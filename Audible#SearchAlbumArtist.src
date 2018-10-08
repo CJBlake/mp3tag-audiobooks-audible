@@ -1,0 +1,218 @@
+# ###################################################################
+#
+# Mp3tag parsing for Audible.com.au, created by dano on 2013-03-11
+#
+# 2018-03-30: Updated by qudo
+#
+# This file should be in your sources dir. 
+# On Windows XP it's C:\Documents and Settings\*username*\Application Data\Mp3tag\data\sources
+#
+#
+
+[Name]=audible.com.au
+[BasedOn]=www.audible.com.au
+[IndexUrl]=http://www.audible.com.au/search/ref=a_search_tseft__galileo?advsearchKeywords=%s
+[AlbumUrl]=http://www.audible.com.au
+[WordSeperator]=+
+[IndexFormat]=%_url%|%Album%|%Type%|%Time%
+[SearchBy]=%album% %artist%
+[Encoding]=url
+
+
+#OUTPUT			Line		Search					Status
+	
+#Serie:			1535		/series/					ISSUES (commented at the end)
+#CAT1:			2077								OK
+#Category:			2111								OK
+#CoverURL:			2119		adbl-prod-image-sample-cont		OK
+#ALBUM:			2173		adbl-prod-h1-title				OK
+#Autor:			2186		adbl-link author-profile-link		OK
+#AlbumArtist:		2196		adbl-prod-author				OK
+#Year:			2284		adbl-date adbl-release-date		OK
+#Composer			1574		PublisherSearchLink\			OK
+#Comment:			2670		adbl-content				OK
+
+
+[ParserScriptIndex]=...
+debug "on" "C:\Users\Chris\Desktop\debug_Audible Album A.htm"
+debugwriteinput "C:\Users\Chris\Desktop\Audible Album A.htm"
+
+# find the search results div
+#findline "<div id=\"center-3"
+# find the search results list
+#findline "<ul  class=\"bc-list"
+
+do
+	# find search result item text
+	findline "productListItem"
+	findline "class=\"bc-list"
+
+	# URL
+	findline "<a class=\"bc-link"
+	joinuntil "</a"
+	findinline "href=\""
+	# get the URL (not you will need to change in IndexFormat variable if you move this)
+	sayuntil "\""
+	say "|"
+	# Album
+	#SayNChars 100
+	findinline ">"	
+	sayuntil "<"
+	say "|"
+		
+	# Author
+	#findline "authorLabel"
+	#findline "<a class=\"bc-link"
+	#joinuntil "</a"
+	#findinline ">"
+	#sayuntil "<"
+	#say "|"	
+		
+	# Narrator
+	#findline "narratorLabel"
+	#findline "<a class=\"bc-link"
+	#joinuntil "</a"
+	#findinline ">"
+	#sayuntil "<"
+	#say "|"	
+	
+	# Album (v2 incase there was issue with previous method try this)
+	#findline "<li class=\"bc-list-item productListItem\""
+	#should be able to get this from the aria label attribute
+	#findinline "aria-label="
+	#sayuntil ">"
+	#say "|"
+
+	# Series
+	#findline "<li class=\"bc-list-item subtitle\">"
+	#findline "<span class=\"bc-text"
+	#joinuntil "</span"
+	#findinline ">"
+	#sayuntil "<"
+	#say "|"
+
+	# Type (can't find where to map this to)
+	say "Audiobook"
+
+	# Time (note this is a string in the format: length ## hrs and # mins)
+	findline "runtimeLabel"
+	findline "<span class=\"bc-text"
+	joinuntil "</span"
+	findinline ">"
+	sayuntil "<"
+	say "|"	
+
+	# Release date (note this is a string in the format: length ## hrs and # mins)
+	#findline "<li class=\"bc-list-item	releaseDateLabel\">"
+	#findline "<span class=\"bc-text"
+	#joinuntil "</span"
+	#findinline ">"
+	#sayuntil "<"
+	#say "|"	
+
+	# Rating (note this is a string in the format: length ## hrs and # mins)
+	#findline "<li class=\"bc-list-item ratingsLabel\">"
+	#findline "<span class=\"bc-text"
+	#joinuntil "</span"
+	#findinline ">"
+	#sayuntil "<"
+	#say "|"	
+	
+	saynewline
+
+while "<li class=\"bc-list-item" 2
+
+[ParserScriptAlbum]=...
+debug "on" "C:\Users\Chris\Desktop\debug_Audible Album B.htm"
+debugwriteinput "C:\Users\Chris\Desktop\Audible Album B.htm"
+
+
+# CAT1
+	outputto "Genre"
+	findline "id=\"center-1"
+	findline "/cat/"
+	joinuntil "</a"
+	findinline ">"
+	sayuntil "<"
+	say "|"
+	
+#CAT2
+	outputto "Category"
+	findline "/cat/"
+	#joinuntil "</a"
+	joinuntil "</a"
+	findinline ">"
+	sayuntil "<"
+	say "|"
+	
+	
+#COVER 500x500px
+	outputto "CoverURL"
+	findline "class=\"bc-pub-block"
+	joinuntil "/>"
+	replace "_SL175_" "_SS500_"
+	replace "_SL300_" "_SS500_"
+	findinline "src=\""
+	sayuntil "\""
+	
+#ALBUM
+	outputto "Album"
+	findline "bc-heading"
+	joinuntil "</"
+	findinline ">"
+	sayuntil "<"
+	say "|"
+	
+#AUTHOR
+	outputto "Artist"
+	findline "authorLabel"
+	findline "<a class=\"bc-link"
+	joinuntil "</a"
+	findinline ">"
+	sayuntil "<"
+	say "|"
+	
+# SPRECHER
+	outputto "Albumartist"
+	findline "narratorLabel"
+	findline "<a class=\"bc-link"
+	joinuntil "</a"
+	findinline ">"
+	sayuntil "<"
+	say "|"	
+
+# Release date
+	outputto "Year"
+	findline "releaseDateLabel"	
+	findline "Release date:"
+	joinuntil "</"
+	replace " " ""
+	findinline "Releasedate:"
+	findinline "-"
+	findinline "-"
+	sayuntil "<"
+	say "|"
+	
+# Composer
+	outputto "COMPOSER"
+	findline "publisherLabel"
+	findline "<a class=\"bc-link"
+	joinuntil "</a"
+	sayuntil "<"
+	say "|"
+	
+#Comment
+	outputto "comment"
+	findline "ratingsLabel"
+	findline "bc-pub-offscreen"
+	joinuntil "</"
+	findinline ">"
+	sayuntil "<"
+	say "|"
+
+#ASIN ########### need to move later
+	outputto "ASIN"
+	findline "productAsin"
+	findinline "value=\""
+	sayuntil "\""
+	say "|"
