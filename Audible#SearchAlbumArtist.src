@@ -34,9 +34,6 @@
 
 
 [ParserScriptIndex]=...
-debug "on" "C:\Users\Chris\Desktop\debug_Audible Album A.htm"
-debugwriteinput "C:\Users\Chris\Desktop\Audible Album A.htm"
-
 # find the search results div
 #findline "<div id=\"center-3"
 # find the search results list
@@ -123,10 +120,6 @@ do
 while "<li class=\"bc-list-item" 2
 
 [ParserScriptAlbum]=...
-debug "on" "C:\Users\Chris\Desktop\debug_Audible Album B.htm"
-debugwriteinput "C:\Users\Chris\Desktop\Audible Album B.htm"
-
-
 # CAT1
 	outputto "Genre"
 	findline "id=\"center-1"
